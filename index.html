@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Logistische Abbildung – Interaktiv</title>
+  <!-- Plotly laden -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      background: #f8f9fa;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 14px;
+    }
+    input[type="number"] {
+      width: 100px;
+      padding: 5px;
+      margin-top: 4px;
+    }
+    button {
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .checkboxes {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+    #plot {
+      width: 90%;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Logistische Abbildung</h1>
+  
+  <div class="controls">
+    <label>
+      Wachstumsrate (r)
+      <input type="number" id="r" step="0.1" value="3.9">
+    </label>
+    <label>
+      Startwert (x₀)
+      <input type="number" id="x0" step="0.01" value="0.5">
+    </label>
+    <label>
+      Iterationen (n)
+      <input type="number" id="iterations" step="1" value="100">
+    </label>
+    <button id="update">Aktualisieren</button>
+  </div>
+
+  <div class="checkboxes">
+    <label><input type="checkbox" id="showLine" checked> Linie anzeigen</label>
+    <label><input type="checkbox" id="showMarker" checked> Marker anzeigen</label>
+  </div>
+
+  <div id="plot"></div>
+
+  <script>
+    // Logistische Abbildung berechnen
+    function logisticMap(r, x0, n) {
+      n = Math.floor(n);
+      const results = [x0];
+      let x = x0;
+      for (let i = 1; i < n; i++) {
+        x = r * x * (1 - x);
+        results.push(x);
+      }
+      return results;
+    }
+
+    // Plot-Funktion
+    function drawPlot() {
+      const r = parseFloat(document.getElementById("r").value);
+      const x0 = parseFloat(document.getElementById("x0").value);
+      const iterations = parseInt(document.getElementById("iterations").value);
+
+      if (isNaN(r) || isNaN(x0) || isNaN(iterations)) {
+        alert("Bitte nur Zahlen eingeben!");
+        return;
+      }
+
+      const data = logisticMap(r, x0, iterations);
+      const xValues = Array.from({length: iterations}, (_, i) => i);
+
+      const showLine = document.getElementById("showLine").checked;
+      const showMarker = document.getElementById("showMarker").checked;
+
+      // Sicherstellen, dass man etwas sieht
+      const mode = (showLine && showMarker) ? "lines+markers" :
+                   (showLine ? "lines" :
+                   (showMarker ? "markers" : "lines"));
+
+      const trace = {
+        x: xValues,
+        y: data,
+        mode: mode,
+        type: 'scatter',
+        marker: { size: 6, color: '#007bff' },
+        line: { width: 2, color: '#007bff' },
+        name: 'x'
+      };
+
+      const layout = {
+        title: `Logistische Abbildung mit r = ${r}`,
+        xaxis: { title: "Iteration" },
+        yaxis: { title: "Population (x)", range: [0, 1] },
+        margin: { t: 50, l: 50, r: 20, b: 50 }
+      };
+
+      Plotly.newPlot('plot', [trace], layout, {responsive: true});
+    }
+
+    // Event-Listener
+    document.getElementById("update").addEventListener("click", drawPlot);
+    document.getElementById("r").addEventListener("keyup", (e) => { if (e.key === "Enter") drawPlot(); });
+    document.getElementById("x0").addEventListener("keyup", (e) => { if (e.key === "Enter") drawPlot(); });
+    document.getElementById("iterations").addEventListener("keyup", (e) => { if (e.key === "Enter") drawPlot(); });
+    document.getElementById("showLine").addEventListener("change", drawPlot);
+    document.getElementById("showMarker").addEventListener("change", drawPlot);
+
+    // Startplot
+    drawPlot();
+  </script>
+</body>
+</html>
