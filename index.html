@@ -110,13 +110,28 @@
         return;
       }
 
+      // Eingaben prüfen
+      if (r < 1 || r > 4) {
+        alert("Die Wachstumsrate r muss im Intervall [1, 4] liegen.");
+        return;
+      }
+
+      if (x0 <= 0 || x0 >= 1) {
+        alert("Der Startwert x₀ muss im offenen Intervall (0, 1) liegen.");
+        return;
+      }
+
+      if (iterations <= 0 || iterations >= 1000) {
+        alert("Die Anzahl der Iterationen muss zwischen 1 und 999 liegen.");
+        return;
+      }
+
       const data = logisticMap(r, x0, iterations);
       const xValues = Array.from({length: iterations}, (_, i) => i);
 
       const showLine = document.getElementById("showLine").checked;
       const showMarker = document.getElementById("showMarker").checked;
 
-      // Sicherstellen, dass man etwas sieht
       const mode = (showLine && showMarker) ? "lines+markers" :
                    (showLine ? "lines" :
                    (showMarker ? "markers" : "lines"));
